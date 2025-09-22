@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "MVVMLibrary",
+	"Description": "A variant of a set of basic abstractions for the MVVM pattern and auxiliary architectural classes.",
+	"Category": "UI",
+	"CreatedBy": "Alexsander Khrapin",
+	"CreatedByURL": "https://github.com/Frozenheart32",
+	"DocsURL": "https://github.com/Frozenheart32/MVVMLibrary/blob/main/README.md",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"EngineVersion": "5.3+",
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "MVVMLibrary",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64",
+				"Mac",
+				"IOS",
+				"Android",
+				"Linux"
+			]
+		}
+	]
+}
