@@ -1,4 +1,7 @@
 # MVVM Library Plugin
+
+![License](https://img.shields.io/badge/license-MIT-blue) ![Version](https://img.shields.io/badge/version-1.0.0-green) ![UE5](https://img.shields.io/badge/Unreal%20Engine-5.3+-blue?logo=unrealengine)
+
 # Purpose
 
 The MVVM (Model-View-ViewModel) architectural pattern is designed to separate data management logic from presentation logic.
