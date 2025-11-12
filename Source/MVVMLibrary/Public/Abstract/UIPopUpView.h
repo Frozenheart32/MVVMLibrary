@@ -78,7 +78,7 @@ protected:
 	 * @param InModelRepository 
 	 * @param InWorldModelRepository 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|Pop-Up", meta=(ForceAsFunction, DisplayName = "InitializePopUp", ScriptName = "InitializePopUp"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|Pop-Up", meta=(ForceAsFunction, DisplayName = "InitializePopUp", ScriptName = "InitializePopUp"))
 	void K2_InitializePopUp(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository);
 
 	friend class UWindowSubsystem;

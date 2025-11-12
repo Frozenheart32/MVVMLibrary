@@ -57,18 +57,6 @@ protected:
 
 	virtual void NativeDestruct() override;
 
-	/**
-	 *  Should be overridden in C++ heirs for additional logic 
-	 */
-	UFUNCTION()
-	virtual void ShowView();
-	
-	/**
-	 *  Should be overridden in C++ heirs for additional logic 
-	 */
-	UFUNCTION()
-	virtual void HideView();
-
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|View")
@@ -87,18 +75,11 @@ protected:
 	 */
 	UFUNCTION()
 	void InitializeView(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository);
-
-	/**
-	 * Service method. Do not call from C++
-	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|View", meta=(ForceAsFunction, DisplayName = "ShowView", ScriptName = "ShowView"))
-	void K2_ShowView();
-
-	/**
-	 * Service method. Do not call from C++
-	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|View", meta=(ForceAsFunction, DisplayName = "HideView", ScriptName = "HideView"))
-	void K2_HideView();
+	
+	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|View", meta=(ForceAsFunction))
+	void ShowView();
+	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|View", meta=(ForceAsFunction))
+	void HideView();
 
 	friend class UWindowSubsystem;
 	friend class UUIViewModel;

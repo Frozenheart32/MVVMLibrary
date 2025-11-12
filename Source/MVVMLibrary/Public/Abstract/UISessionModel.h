@@ -54,21 +54,21 @@ protected:
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param InModelRepository 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|SessionModel", meta=(ForceAsFunction, DisplayName = "SetModelRepository", ScriptName = "SetModelRepository"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|SessionModel", meta=(ForceAsFunction, DisplayName = "SetModelRepository", ScriptName = "SetModelRepository"))
 	void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository);
 
 	/**
 	 * Event called when the model is created.
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|SessionModel", meta=(DisplayName = "StartSession", ScriptName = "StartSession"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|SessionModel", meta=(DisplayName = "StartSession", ScriptName = "StartSession"))
 	void K2_StartSession();
 	
 	/**
 	 * Event called when started shutdown game.
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|SessionModel", meta=(DisplayName = "EndSession", ScriptName = "EndSession"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|SessionModel", meta=(DisplayName = "EndSession", ScriptName = "EndSession"))
 	void K2_EndSession();
 
 	friend class UModelRepositorySubsystem;

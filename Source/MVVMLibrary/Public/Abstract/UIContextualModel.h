@@ -64,27 +64,27 @@ protected:
 	 * Do not call this event yourself. For C++ heirs there is a virtual method without K2 prefix
 	 * @param InWorldModelRepository 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ContextualModel", meta=(ForceAsFunction, DisplayName = "SetWorldModelRepository", ScriptName = "SetWorldModelRepository"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ContextualModel", meta=(ForceAsFunction, DisplayName = "SetWorldModelRepository", ScriptName = "SetWorldModelRepository"))
 	void K2_SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository);
 	/**
 	 * Sets the model repository. You can use an override to get the required dependencies.
 	 * Do not call this event yourself. For C++ heirs there is a virtual method without K2 prefix
 	 * @param InModelRepository 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ContextualModel", meta=(ForceAsFunction, DisplayName = "SetModelRepository", ScriptName = "SetModelRepository"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ContextualModel", meta=(ForceAsFunction, DisplayName = "SetModelRepository", ScriptName = "SetModelRepository"))
 	void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository);
 
 	/**
 	 * Event called when the model is created.
 	 * Do not call this event yourself. For C++ heirs there is a virtual method without K2 prefix
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ContextualModel", meta=(DisplayName = "OnInitModel", ScriptName = "OnInitModel"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ContextualModel", meta=(DisplayName = "OnInitModel", ScriptName = "OnInitModel"))
 	void K2_OnInitModel();
 	/**
 	 * Event called when changing scene / shutdown game.
 	 * Do not call this event yourself. For C++ heirs there is a virtual method without K2 prefix
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ContextualModel", meta=(DisplayName = "OnDestroyModel", ScriptName = "OnDestroyModel"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ContextualModel", meta=(DisplayName = "OnDestroyModel", ScriptName = "OnDestroyModel"))
 	void K2_OnDestroyModel();
 
 	friend class UWorldModelRepositorySubsystem;

@@ -20,7 +20,7 @@ void UWorldModelRepositorySubsystem::Deinitialize()
 	for (const auto& [ModelType, ContextualModel] : ContextualModels)
 	{
 		if(ContextualModel)
-			ContextualModel->K2_OnDestroyModel();
+			ContextualModel->OnDestroyModel();
 	}
 
 	ContextualModels.Empty();
@@ -47,10 +47,10 @@ UUIContextualModel* UWorldModelRepositorySubsystem::CreateContextualModel(const 
 	const auto ModelRepository = GetModeRepositorySubsystem();
 	check(ModelRepository);
 	ContextualModels.Add(ModelType, NewModel);
-	NewModel->K2_SetModelRepository(ModelRepository);
-	NewModel->K2_SetWorldModelRepository(this);
+	NewModel->SetModelRepository(ModelRepository);
+	NewModel->SetWorldModelRepository(this);
 
-	NewModel->K2_OnInitModel();
+	NewModel->OnInitModel();
 
 	return NewModel;
 }

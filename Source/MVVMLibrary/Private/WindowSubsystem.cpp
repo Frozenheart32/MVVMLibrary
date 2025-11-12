@@ -41,7 +41,7 @@ UUIView* UWindowSubsystem::OpenWindow(TSubclassOf<UUIView> WindowType, APlayerCo
 
 	if(bIsHiddenAllWindows)
 	{
-		Window->K2_HideView();
+		Window->HideView();
 	}
 	
 	Window->AddToViewport(static_cast<int32>(Window->GetUILayer()));
@@ -107,7 +107,7 @@ void UWindowSubsystem::HideAllWindows()
 	bIsHiddenAllWindows = true;
 	for (const auto& WindowPair : OpenedWindows)
 	{
-		WindowPair.Value->K2_HideView();
+		WindowPair.Value->HideView();
 	} 
 }
 
@@ -118,7 +118,7 @@ void UWindowSubsystem::ShowAllWindows()
 	bIsHiddenAllWindows = false;
 	for (const auto& WindowPair : OpenedWindows)
 	{
-		WindowPair.Value->K2_ShowView();
+		WindowPair.Value->ShowView();
 	}
 }
 
@@ -148,7 +148,7 @@ UUIPopUpView* UWindowSubsystem::CreatePopUp(TSubclassOf<UUIPopUpView> PopUpType,
 
 	const auto WorldModelRepositorySubsystem = GetWorld()->GetSubsystem<UWorldModelRepositorySubsystem>();
 	const auto ModelRepositorySubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UModelRepositorySubsystem>();
-	PopUp->K2_InitializePopUp(ModelRepositorySubsystem, WorldModelRepositorySubsystem);
+	PopUp->InitializePopUp(ModelRepositorySubsystem, WorldModelRepositorySubsystem);
 
 	return PopUp;
 }

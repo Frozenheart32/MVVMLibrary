@@ -27,9 +27,9 @@ void UUIView::InitializeView(UModelRepositorySubsystem* InModelRepository,
 	checkf(IsValid(ViewModelClassType), TEXT("You have not selected a viewmodel class in view settings. View class name: %s"), *GetNameSafe(this));
 
 	ViewModel = NewObject<UUIViewModel>(this, ViewModelClassType);
-	ViewModel->K2_SetModelRepository(InModelRepository);
-	ViewModel->K2_SetWorldModelRepository(InWorldModelRepository);
-	ViewModel->K2_InitializeViewModel(this);
+	ViewModel->SetModelRepository(InModelRepository);
+	ViewModel->SetWorldModelRepository(InWorldModelRepository);
+	ViewModel->InitializeViewModel(this);
 }
 
 EUILayer UUIView::GetUILayer() const
@@ -42,22 +42,12 @@ bool UUIView::IsInitializedView() const
 	return bIsInitializedView;
 }
 
-void UUIView::K2_ShowView_Implementation()
-{
-	ShowView();
-}
-
-void UUIView::K2_HideView_Implementation()
-{
-	HideView();
-}
-
-void UUIView::ShowView()
+void UUIView::ShowView_Implementation()
 {
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
-void UUIView::HideView()
+void UUIView::HideView_Implementation()
 {
 	SetVisibility(ESlateVisibility::Collapsed);
 }

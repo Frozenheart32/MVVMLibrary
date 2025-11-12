@@ -89,7 +89,7 @@ protected:
 	 * Need calling parent version.
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "OnDestroyViewModel", ScriptName = "OnDestroyViewModel"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "OnDestroyViewModel", ScriptName = "OnDestroyViewModel"))
 	void K2_OnDestroyViewModel();
 	
 	/**
@@ -97,7 +97,7 @@ protected:
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param InModelRepository 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "SetModelRepository", ScriptName = "SetModelRepository"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "SetModelRepository", ScriptName = "SetModelRepository"))
 	void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository);
 
 	/**
@@ -105,7 +105,7 @@ protected:
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param InWorldModelRepository 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "SetWorldModelRepository", ScriptName = "SetWorldModelRepository"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "SetWorldModelRepository", ScriptName = "SetWorldModelRepository"))
 	void K2_SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository);
 
 	/**
@@ -114,7 +114,7 @@ protected:
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param View 
 	 */
-	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "InitializeViewModel", ScriptName = "InitializeViewModel"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "InitializeViewModel", ScriptName = "InitializeViewModel"))
 	void K2_InitializeViewModel(UUIView* View);
 	
 	friend class UUIView;

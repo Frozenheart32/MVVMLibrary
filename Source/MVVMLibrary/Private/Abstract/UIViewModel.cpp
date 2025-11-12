@@ -53,50 +53,36 @@ UUIView* UUIViewModel::GetOwnerView() const
 
 void UUIViewModel::OnDestroyViewModel()
 {
+	//Unsubscribe from OnDestroyView event
+	if(const auto View = GetOwnerView())
+	{
+		View->OnDestroyView.RemoveDynamic(this, &UUIViewModel::OnDestroyViewModel);
+	}
 	
+	K2_OnDestroyViewModel();
 }
 
 void UUIViewModel::SetModelRepository(UModelRepositorySubsystem* InModelRepository)
 {
 	ModelRepository = InModelRepository;
+
+	K2_SetModelRepository(InModelRepository);
 }
 
 void UUIViewModel::SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)
 {
 	WorldModelRepository = InWorldModelRepository;
+
+	K2_SetWorldModelRepository(InWorldModelRepository);
 }
 
 void UUIViewModel::InitializeViewModel(UUIView* View)
 {
-	OwnerView = View;
-}
-
-void UUIViewModel::K2_OnDestroyViewModel_Implementation()
-{
-	//Unsubscribe from OnDestroyView event
-	if(const auto View = GetOwnerView())
-	{
-		View->OnDestroyView.RemoveDynamic(this, &UUIViewModel::K2_OnDestroyViewModel);
-	}
-	
-	OnDestroyViewModel();
-}
-
-void UUIViewModel::K2_SetModelRepository_Implementation(UModelRepositorySubsystem* InModelRepository)
-{
-	SetModelRepository(InModelRepository);
-}
-
-void UUIViewModel::K2_SetWorldModelRepository_Implementation(UWorldModelRepositorySubsystem* InWorldModelRepository)
-{
-	SetWorldModelRepository(InWorldModelRepository);
-}
-
-void UUIViewModel::K2_InitializeViewModel_Implementation(UUIView* View)
-{
 	check(View);
-	InitializeViewModel(View);
+	OwnerView = View;
 
 	//Subscribe on OnDestroyView event
-	View->OnDestroyView.AddDynamic(this, &UUIViewModel::K2_OnDestroyViewModel);
+	View->OnDestroyView.AddDynamic(this, &UUIViewModel::OnDestroyViewModel);
+	
+	K2_InitializeViewModel(View);
 }

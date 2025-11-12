@@ -31,7 +31,7 @@ void UModelRepositorySubsystem::CloseSession()
 	for (const auto& [ModelType, SessionModel] : SessionModels)
 	{
 		if(SessionModel)
-			SessionModel->K2_EndSession();
+			SessionModel->EndSession();
 	}
 
 	SessionModels.Empty();
@@ -41,8 +41,8 @@ UUISessionModel* UModelRepositorySubsystem::CreateSessionModel(const TSubclassOf
 {
 	UUISessionModel* NewModel = NewObject<UUISessionModel>(this, ModelType);
 	SessionModels.Add(ModelType, NewModel);
-	NewModel->K2_SetModelRepository(this);
-	NewModel->K2_StartSession();
+	NewModel->SetModelRepository(this);
+	NewModel->StartSession();
 
 	return NewModel;
 }
