@@ -58,7 +58,7 @@ UObject → UObjectWithWorldContext → UUISessionModel
 ### Fields
 
 **`TWeakObjectPtr<UModelRepositorySubsystem> ModelRepository`**
-Private. A weak pointer to the storage of `UUISessionModel` instances. Derived classes access this field via the `GetModelRepository` method. New values are set in the virtual `SetModelRepository` method, which is in turn called from `K2_SetModelRepository`.
+Private. A weak pointer to the storage of `UUISessionModel` instances. Derived classes access this field via the `GetModelRepository` method. New values are set in the virtual `SetModelRepository` method.
 
 ### Methods
 
@@ -66,29 +66,29 @@ Private. A weak pointer to the storage of `UUISessionModel` instances. Derived c
 Protected. This method provides access to the session models storage.
   
 **`void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository)`**
-Protecated. This method is a BlueprintNativeEvent. To retrieve other session models if needed. This event is called during the class model instance creation process. Internally, the event calls the virtual method `SetModelRepository`. This approach provides flexibility for both Blueprints and C++ workflows.
-- In **Blueprint child classes**, you can override the `SetModelRepository` event and must always call the parent function before your custom logic to ensure the default C++ implementation is executed (this method sets the new value in the `ModelRepository` field).
+Protecated. This method is a BlueprintImplementableEvent. To retrieve other session models if needed. This event is called during the class model instance creation process.
+- In **Blueprint child classes**, you can override the `SetModelRepository` event.
 - In **C++ child classes**, you should override the virtual `SetModelRepository` method and also remember to call the parent logic via `Super::SetModelRepository`.
 
 **`void K2_StartSession()`**
-Protected. This method is a BlueprintNativeEvent.
-Called immediately after `K2_SetModelRepository`. Should be used when you need logic to be executed at the moment of session model instance creation. Internally, the event calls the virtual method `StartSession` for C++ child classes.
+Protected. This method is a BlueprintImplementableEvent.
+Called immediately after `K2_SetModelRepository`. Should be used when you need logic to be executed at the moment of session model instance creation.
 
-**`void K2_EndSession()`** - This method is a BlueprintNativeEvent.
-Protected. Called in `UModelRepositorySubsystem` when the game shuts down for any reason.
-Should be used when you need logic to be executed at the moment of session model instance destruction. Internally, the event calls the virtual method `EndSession`.
+**`void K2_EndSession()`** - This method is a BlueprintImplementableEvent.
+Protected. Called in when the game shuts down for any reason.
+Should be used when you need logic to be executed at the moment of session model instance destruction.
 
-> **⚠ Warning:** A similar approach is used for BlueprintNativeEvents with a `K2` prefix:
+> **⚠ Warning:**
 > - **Blueprint child classes** - override the events
 > - **C++ child classes** - override virtual methods with the same name (without the `K2` prefix)
 
 Virtual methods for C++ heirs:
 
-**`virtal void SetModelRepository(UModelRepositorySubsystem* InModelRepository)`**
+**`virtal void SetModelRepository(UModelRepositorySubsystem* InModelRepository)`** - set parameter to ModelRepository field and call K2_SetModelRepository.
 
-**`virtal void StartSession()`**
+**`virtal void StartSession()`** - call K2_StartSession method.
 
-**`virtual void EndSession()`**
+**`virtual void EndSession()`** - call K2_EndSession method.
 
 ## 🎯 `UUIContextualModel` class
 
@@ -101,10 +101,10 @@ UObject → UObjectWithWorldContext → UUIContextualModel
 ### Fields
 
 **`TWeakObjectPtr<UModelRepositorySubsystem> ModelRepository`**
-Private. Weak pointer to the storage of `UUISessionModel` instances. Derived classes access this field via the `GetModelRepository()` method. New values are set in the virtual `SetModelRepository()` method, which is called from `K2_SetModelRepository()`.
+Private. Weak pointer to the storage of `UUISessionModel` instances. Derived classes access this field via the `GetModelRepository()` method. New values are set in the virtual `SetModelRepository()` method.
 
 **`TWeakObjectPtr<UWorldModelRepositorySubsystem> WorldModelRepository`** 
-Private. Weak pointer to the storage of `UUIContextualModel` instances. Derived classes access this field via the `GetWorldModelRepository()` method. New values are set in the virtual `SetWorldModelRepository()` method, which is called from `K2_SetWorldModelRepository()`.
+Private. Weak pointer to the storage of `UUIContextualModel` instances. Derived classes access this field via the `GetWorldModelRepository()` method. New values are set in the virtual `SetWorldModelRepository()` method.
 
 ### Methods
 
@@ -115,33 +115,31 @@ Protected. This method provides access to the session models storage.
 Protected. This method provides access to the contextual models storage.
 
 **`void K2_SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)`**
-Protected. This method is a BlueprintNativeEvent.
+Protected. This method is a BlueprintImplementableEvent.
 To retrieve other contextual models if needed.
-This event is called during the class model instance creation process. Internally, the event calls the virtual method `SetWorldModelRepository`. This approach provides flexibility for both Blueprints and C++ workflows.
+This event is called during the class model instance creation process.
 
 **`void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository)`**
-Protected. This method is a BlueprintNativeEvent.
+Protected. This method is a BlueprintImplementableEvent.
 To retrieve other session models if needed.
-This event is called during the class model instance creation process. Internally, the event calls the virtual method `SetModelRepository`.
 
 **`void K2_OnInitModel()`**
-Protected. This method is a BlueprintNativeEvent.
-Called immediately after `K2_SetModelRepository`. Should be used when you need logic to be executed at the moment of contextual model instance creation. Internally, the event calls the virtual method `OnInitModel`.
+Protected. This method is a BlueprintImplementableEvent.
+Should be used when you need logic to be executed at the moment of contextual model instance creation.
 
 **`void K2_OnDestroyModel()`**
-Protected. This method is a BlueprintNativeEvent.
-Called in `UWorldModelRepositorySubsystem` when the player transitions to another scene or the game closes.
-Should be used when you need logic to be executed at the moment of contextual model instance destruction. Internally, the event calls the virtual method `OnDestroyModel`.
+Protected. This method is a BlueprintImplementableEvent.
+Should be used when you need logic to be executed at the moment of contextual model instance destruction.
 
 Virtual methods for C++ heirs:
 
-**`virtal void SetModelRepository(UModelRepositorySubsystem* InModelRepository)`**
+**`virtal void SetModelRepository(UModelRepositorySubsystem* InModelRepository)`** - Set value to ModelRepository field and call K2_SetModelRepository method.
 
-**`virtal void SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)`**
+**`virtal void SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)`** - Set value to WorldModelRepository field and call K2_SetWorldModelRepository method.
 
-**`virtal void OnInitModel()`**
+**`virtal void OnInitModel()`** - call K2_OnInitModel method.
 
-**`virtual void OnDestroyModel()`**
+**`virtual void OnDestroyModel()`** - call K2_OnDestroyModel method.
 
 
 ## 🎯 `UUIView` class
@@ -157,7 +155,7 @@ UObject -> UVisual -> UWidget -> UUserWidget -> UUIView
 ### Delegates
 
 **`OnDestroyView`**
-Protected. This delegate is called when the window is destroyed (upon closing or level transition). The `UIViewModel` (friend class) subscribes to this delegate in the base logic of `UIViewModel::K2_InitializeViewModel()`.
+Protected. This delegate is called when the window is destroyed (upon closing or level transition). The `UIViewModel` (friend class) subscribes to this delegate in the base logic of `UIViewModel::InitializeViewModel()`.
 
 
 ### Fields
@@ -174,9 +172,9 @@ Protected. This field determines on which layer the view will be displayed (Behi
 Protected. This method is called from C++ in `UWindowSubsystem` (friend class). Designed to initialize the view by:
 - Creating the selected UIViewModel
 - Calling the following methods on the created instance:
-  - `K2_SetModelRepository`
-  - `K2_SetWorldModelRepository` 
-  - `K2_InitializeViewModel`
+  - `SetModelRepository`
+  - `SetWorldModelRepository` 
+  - `InitializeViewModel`
 
 
 
@@ -204,10 +202,10 @@ UObject -> UObjectWithWorldContext -> UUIViewModel
 ### Fields
 
 **`TWeakObjectPtr<UModelRepositorySubsystem> ModelRepository`**
-Private. Weak pointer to the storage of `UUISessionModel` instances. Derived classes access this field via the `GetModelRepository()` method. New values are set in the virtual `SetModelRepository()` method, which is called from `K2_SetModelRepository()`.
+Private. Weak pointer to the storage of `UUISessionModel` instances. Derived classes access this field via the `GetModelRepository()` method. New values are set in the virtual `SetModelRepository()` method.
 
 **`TWeakObjectPtr<UWorldModelRepositorySubsystem> WorldModelRepository`**
-Private. Weak pointer to the storage of `UUIContextualModel` instances. Derived classes access this field via the `GetWorldModelRepository()` method. New values are set in the virtual `SetWorldModelRepository()` method, which is called from `K2_SetWorldModelRepository()`.
+Private. Weak pointer to the storage of `UUIContextualModel` instances. Derived classes access this field via the `GetWorldModelRepository()` method. New values are set in the virtual `SetWorldModelRepository()` method.
 
 **`TWeakObjectPtr<UUIView> OwnerView`** 
 Private. Weak pointer to the `UUIView` instance that owns this ViewModel.
@@ -231,33 +229,32 @@ Protected. This method returns a pointer to the view that owns this ViewModel.
 
 
 **`void K2_SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)`** 
-Protected. (UUView - friend class). This method is a BlueprintNativeEvent.
+Protected. (UUView - friend class). This method is a BlueprintImplementableEvent.
 To retrieve other contextual models if needed.
-This event is called during the ViewModel class instance creation process. Internally, the event calls the virtual method `SetWorldModelRepository`. This approach provides flexibility for both Blueprints and C++ workflows.
+This event is called during the ViewModel class instance creation process.
 
 **`void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository)`**
-Protected. (UUView - friend class). This method is a BlueprintNativeEvent.
+Protected. (UUView - friend class). This method is a BlueprintImplementableEvent.
 To retrieve other session models if needed.
-
-This event is called during the ViewModel class instance creation process. Internally, the event calls the virtual method `SetModelRepository`.
+This event is called during the ViewModel class instance creation process.
 
 **`void K2_InitializeViewModel(UUIView* View)`** 
-Protected. (UUView - friend class). This method is a BlueprintNativeEvent.
-Called immediately after `K2_SetModelRepository`. Should be used to initialize the owning view (`UUIView` child) with initial values and subscribe to model and/or view events. Internally, the event calls the virtual method `InitializeViewModel`.
+Protected. (UUView - friend class). This method is a BlueprintImplementableEvent.
+Called immediately after `K2_SetModelRepository`. Should be used to initialize the owning view (`UUIView` child) with initial values and subscribe to model and/or view events.
 
 **`void K2_OnDestroyViewModel(UUIView* View)`**
-Protected. This method is a BlueprintNativeEvent. Called when the `OnDestroyView` delegate is broadcasted on the `OwnerView`. In the base logic, it unsubscribes from this event. You can extend this logic to unsubscribe from your custom subscriptions to model and view delegate. Also internally, the event calls the virtual method `OnDestroyViewModel`.
+Protected. This method is a BlueprintImplementableEvent. Called when the `OnDestroyView` delegate is broadcasted on the `OwnerView`. In the base logic, it unsubscribes from this event. You can extend this logic to unsubscribe from your custom subscriptions to model and view delegate.
 
 
 Virtual methods for C++ heirs:
 
-**`virtal void SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)`**
+**`virtal void SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)`** Set parameter to WorldModelRepository field and call K2_SetWorldModelRepository method.
 
-**`virtal void SetModelRepository(UModelRepositorySubsystem* InModelRepository)`**
+**`virtal void SetModelRepository(UModelRepositorySubsystem* InModelRepository)`** Set parameter to ModelRepository field and call K2_SetModelRepository method.
 
-**`virtual void InitializeViewModel(UUIView* View)`**
+**`virtual void InitializeViewModel(UUIView* View)`** - set parameter to OwningView field. Subscribing on OnDestroyView delegate (UUIVIew). Call K2_InitializeViewModel method.
 
-**`virtual void OnDestroyViewModel()`**
+**`virtual void OnDestroyViewModel()`** - Unsubscribing from OnDestroyView delegate (UUIVIew). Call K2_OnDestroyViewModel method.
 
 
 ## 🎯 `UUIPopUpView` class
@@ -291,7 +288,7 @@ Protected. Default value = 3.f. Self destroy timer.
 
 ### Methods
 **`void K2_InitializePopUp(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository)`**
-Protected. This method is called from C++ in `UWindowSubsystem` (friend class). Internally, the event calls the virtual method `InitializePopUp`.
+Protected. 
 
 **`EUILayer GetUILayer() const`** 
 Public. Returns information about which layer the PopUp operates on.

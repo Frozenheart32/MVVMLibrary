@@ -25,6 +25,8 @@ void UUIPopUpView::InitializePopUp(UModelRepositorySubsystem* InModelRepository,
 	ModelRepository = InModelRepository;
 	WorldModelRepository = InWorldModelRepository;
 
+	K2_InitializePopUp(InModelRepository, InWorldModelRepository);
+	
 	if(bUseSelfDestroyTimer)
 	{
 		GetWorld()->GetTimerManager().SetTimer(SelfDestroyTimerHandle,
@@ -33,12 +35,6 @@ void UUIPopUpView::InitializePopUp(UModelRepositorySubsystem* InModelRepository,
 			LifeSpan,
 			false);
 	}
-}
-
-void UUIPopUpView::K2_InitializePopUp_Implementation(UModelRepositorySubsystem* InModelRepository,
-                                                     UWorldModelRepositorySubsystem* InWorldModelRepository)
-{
-	InitializePopUp(InModelRepository, InWorldModelRepository);
 }
 
 EUILayer UUIPopUpView::GetUILayer() const

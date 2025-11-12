@@ -15,29 +15,15 @@ UModelRepositorySubsystem* UUISessionModel::GetModelRepository() const
 void UUISessionModel::SetModelRepository(UModelRepositorySubsystem* InModelRepository)
 {
 	ModelRepository = InModelRepository;
+	K2_SetModelRepository(InModelRepository);
 }
 
 void UUISessionModel::StartSession()
 {
-	
+	K2_StartSession();
 }
 
 void UUISessionModel::EndSession()
 {
-	
-}
-
-void UUISessionModel::K2_SetModelRepository_Implementation(UModelRepositorySubsystem* InModelRepository)
-{
-	SetModelRepository(InModelRepository);
-}
-
-void UUISessionModel::K2_StartSession_Implementation()
-{
-	StartSession();
-}
-
-void UUISessionModel::K2_EndSession_Implementation()
-{
-	EndSession();
+	K2_EndSession();
 }

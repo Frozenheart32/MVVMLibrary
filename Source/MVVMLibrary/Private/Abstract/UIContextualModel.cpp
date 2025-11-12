@@ -21,39 +21,21 @@ UModelRepositorySubsystem* UUIContextualModel::GetModelRepository() const
 void UUIContextualModel::SetWorldModelRepository(UWorldModelRepositorySubsystem* InWorldModelRepository)
 {
 	WorldModelRepository = InWorldModelRepository;
+	K2_SetWorldModelRepository(InWorldModelRepository);
 }
 
 void UUIContextualModel::SetModelRepository(UModelRepositorySubsystem* InModelRepository)
 {
 	ModelRepository = InModelRepository;
+	K2_SetModelRepository(InModelRepository);
 }
 
 void UUIContextualModel::OnInitModel()
 {
-	
+	K2_OnInitModel();
 }
 
 void UUIContextualModel::OnDestroyModel()
 {
-	
-}
-
-void UUIContextualModel::K2_SetWorldModelRepository_Implementation(UWorldModelRepositorySubsystem* InWorldModelRepository)
-{
-	SetWorldModelRepository(InWorldModelRepository);
-}
-
-void UUIContextualModel::K2_SetModelRepository_Implementation(UModelRepositorySubsystem* InModelRepository)
-{
-	SetModelRepository(InModelRepository);
-}
-
-void UUIContextualModel::K2_OnInitModel_Implementation()
-{
-	OnInitModel();
-}
-
-void UUIContextualModel::K2_OnDestroyModel_Implementation()
-{
-	OnDestroyModel();
+	K2_OnDestroyModel();
 }
