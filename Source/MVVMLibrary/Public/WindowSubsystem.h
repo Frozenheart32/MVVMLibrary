@@ -1,20 +1,30 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "Abstract/UIView.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "WindowSubsystem.generated.h"
 
-class UUIPopUpView;
+class UPrimaryLayoutWidget;
+class UUIPopupView;
 class UWorldModelRepositorySubsystem;
 class APlayerController;
 class UModelRepositorySubsystem;
 class UUIView;
 class UPanelWidget;
+
+UENUM(BlueprintType)
+enum class EAsyncPushWidgetState : uint8
+{
+	OnCreatedBeforePush,
+	AfterPush,
+};
 
 /**
  * Serves for spawning, storing and closing windows. Life cycle is one scene
@@ -27,66 +37,57 @@ class MVVMLIBRARY_API UWindowSubsystem : public UWorldSubsystem
 private:
 
 	UPROPERTY()
-	TMap<UClass*, UUIView*> OpenedWindows;
+	TObjectPtr<UPrimaryLayoutWidget> PrimaryLayoutWidget = nullptr;
+
+	UPROPERTY()
+	TMap<FGameplayTag, TSubclassOf<UUIView>> CachedViewTypes;
+	UPROPERTY()
+	TMap<FGameplayTag, TSubclassOf<UUIPopupView>> CachedPopupTypes;
+
+	UPROPERTY()
+	mutable TWeakObjectPtr<UWorldModelRepositorySubsystem> CachedWorldModelRepository = nullptr;
+	UPROPERTY()
+	mutable TWeakObjectPtr<UModelRepositorySubsystem> CachedModelRepository = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "MVVM|WindowSubsystem", meta=(AllowPrivateAccess))
 	bool bIsHiddenAllWindows = false;
 
 protected:
 
-	/**
-	 * Blueprint variant of OpenWindow method
-	 * @param WindowType Selected window type
-	 * @param Owner if nullptr == Owner is WindowService
-	 * @param bResult Is Successful?
-	 * @param OutWindow Opened Window
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "OpenWindow", Category = "MVVM|WindowSubsystem", meta=(DeterminesOutputType = "WindowType", DynamicOutputParam = "OutWindow", ExpandBoolAsExecs="bResult"))
-	void K2_OpenWindow(UUIView*& OutWindow, bool& bResult, UPARAM(meta=(AllowAbstract=false))TSubclassOf<UUIView> WindowType, APlayerController* Owner = nullptr);
+	UFUNCTION(BlueprintCallable, DisplayName = "PushViewToStackByTag", Category = "MVVM|WindowSubsystem")
+	void K2_PushViewToStackByTagAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, UPARAM(meta = (Categories = "MVVM.View"))FGameplayTag InViewTag, bool bIsNeedAddTypeToCache = true, bool bFocusOnNewlyPushedWidget = true);
+	UFUNCTION(BlueprintCallable, DisplayName = "PushViewToStackBySoftClass", Category = "MVVM|WindowSubsystem")
+	void K2_PushViewToStackBySoftClassAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, TSoftClassPtr<UUIView> ViewSoftType, bool bFocusOnNewlyPushedWidget = true);
 
-	/**
-	 * Blueprint variant of OpenWindow method
-	 * @param PopUpType Selected Pop-Up type
-	 * @param Owner if nullptr == Owner is WindowService
-	 * @param ParentWidget Content Widget
-	 * @param bResult Is Successful?
-	 * @param OutPopUp Created Pop-up
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, DisplayName = "CreatePopUp", Category = "MVVM|WindowSubsystem", meta=(DeterminesOutputType = "PopUpType", DynamicOutputParam = "OutPopUp", ExpandBoolAsExecs="bResult"))
-	void K2_CreatePopUp(UUIPopUpView*& OutPopUp, bool& bResult, UPARAM(meta=(AllowAbstract=false))TSubclassOf<UUIPopUpView> PopUpType, APlayerController* Owner = nullptr, UPanelWidget* ParentWidget = nullptr);
+	UFUNCTION(BlueprintCallable, DisplayName = "PushPopupToStackByTag", Category = "MVVM|WindowSubsystem")
+	void K2_PushPopupToStackByTagAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, UPARAM(meta = (Categories = "MVVM.Popup"))FGameplayTag InPopupTag, bool bIsNeedAddTypeToCache = true, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr);
+	UFUNCTION(BlueprintCallable, DisplayName = "PushPopupToStackBySoftClass", Category = "MVVM|WindowSubsystem")
+	void K2_PushPopupToStackBySoftClassAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, TSoftClassPtr<UUIPopupView> PopupSoftType, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr);
+	
 
 public:
 
-	/**
-	 * C++ variant of OpenWindow method
-	 * @param WindowType Selected window type
-	 * @param Owner - nullptr == Owner is WindowService
-	 * @return Needed Window
-	 */
-	UFUNCTION()
-	UUIView* OpenWindow(TSubclassOf<UUIView> WindowType, APlayerController* Owner = nullptr);
-
-	/**
-	 * C++ template variant of OpenWindow method. Auto Cast to T type
-	 * @tparam T Inheritor of UUIView class
-	 * @param Owner nullptr == Owner is WindowService
-	 * @return Needed Pop-up widget
-	 */
-	template<class T = UUIView>
-	T* OpenWindow(TSubclassOf<UUIView> WindowType, APlayerController* Owner = nullptr)
-	{
-		static_assert(TIsDerivedFrom<T, UUIView>::IsDerived, "OpenWindow can only be used to create UUIView instances");
-		
-		check(IsValid(WindowType) && (WindowType->IsChildOf(T::StaticClass()) || WindowType == T::StaticClass()));
-		return Cast<T>(OpenWindow(MoveTemp(WindowType), Owner));
-	}
+	static UWindowSubsystem* Get(const UObject* WorldContextObject);
 	
+	/**
+	 * Creating and register Primary Layout Widget. By default, uses to ACommonMVVMHUD logic.
+	 * @param OwningPlayerController
+	 * @param InLayoutWidgetClass
+	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	bool CloseWindow(TSubclassOf<UUIView> WindowType);
+	void CreateAndRegisterCreatedPrimaryLayoutWidget(APlayerController* OwningPlayerController, const TSubclassOf<UPrimaryLayoutWidget>& InLayoutWidgetClass);
+
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	void CloseAllWindows();
+	void StartPreCachingViewTypes(const TArray<FGameplayTag>& InCachingViewTags);
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	bool IsOpen(TSubclassOf<UUIView> WindowType) const;
+	void StartPreCachingPopupTypes(const TArray<FGameplayTag>& InCachingPopupTags);
+	
+	void PushViewToStackByTagAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const FGameplayTag& InViewTag, bool bIsNeedAddTypeToCache, bool bFocusOnNewlyPushedWidget = true, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback = {});
+	void PushViewToStackBySoftClassAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const TSoftClassPtr<UUIView>& ViewSoftType, bool bFocusOnNewlyPushedWidget = true, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback = {});
+	
+	void PushPopupToStackByTagAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const FGameplayTag& InPopupTag, bool bIsNeedAddTypeToCache, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr, TFunction<void(EAsyncPushWidgetState, UUIPopupView*)> AsyncPushStateCallback = {});
+	void PushPopupToStackBySoftClassAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const TSoftClassPtr<UUIPopupView>& PopupSoftType, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr, TFunction<void(EAsyncPushWidgetState, UUIPopupView*)> AsyncPushStateCallback = {});
+	
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
 	void InitializeExistsView(UUIView* ExistedView);
@@ -96,34 +97,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
 	void ShowAllWindows();
 
-	/**
-	 * C++ variant of CreatePopUp method
-	 * @param PopUpType Selected Pop-up type
-	 * @param Owner - nullptr == Owner is WindowService
-	 * @param ParentWidget Content widget
-	 * @return Needed Pop-up widget
-	 */
-	UFUNCTION()
-	UUIPopUpView* CreatePopUp(TSubclassOf<UUIPopUpView> PopUpType, APlayerController* Owner = nullptr, UPanelWidget* ParentWidget = nullptr);
-
-	/**
-	 * C++ template variant of CreatePopUp method. Auto Cast to T type
-	 * @tparam T Inheritor of UUIPopUpView class
-	 * @param Owner nullptr == Owner is WindowService
-	 * @param ParentWidget Content widget
-	 * @return Needed Pop-up widget
-	 */
-	template<class T = UUIPopUpView>
-	T* CreatePopUp(TSubclassOf<UUIPopUpView> PopUpType, APlayerController* Owner = nullptr, UPanelWidget* ParentWidget = nullptr)
-	{
-		static_assert(TIsDerivedFrom<T, UUIPopUpView>::IsDerived, "CreatePopUp can only be used to create UUIPopUpView instances");
-		
-		check(IsValid(PopUpType) && (PopUpType->IsChildOf(T::StaticClass()) || PopUpType == T::StaticClass()));
-		
-		return Cast<T>(CreatePopUp(MoveTemp(PopUpType), Owner, ParentWidget));
-	}
-
 private:
 
-	UUIView* CreateWindow(const TSubclassOf<UUIView>& WindowType, APlayerController* Owner) const;
+	void CreateView(APlayerController* OwningPlayerController, const TSubclassOf<UUIView>& LoadedViewClass, const FGameplayTag& InWidgetStackTag, bool bFocusOnNewlyPushedWidget, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback);
+	void CreatePopup(APlayerController* OwningPlayerController, const TSubclassOf<UUIPopupView>& LoadedPopupClass, const FGameplayTag& InWidgetStackTag, bool bFocusOnNewlyPushedWidget, UObject* InFeedDataObject, TFunction<void(EAsyncPushWidgetState, UUIPopupView*)> AsyncPushStateCallback);
+
+	UFUNCTION()
+	UModelRepositorySubsystem* GetModelRepositorySubsystem() const;
+	UFUNCTION()
+	UWorldModelRepositorySubsystem* GetWorldModelRepositorySubsystem() const;
 };

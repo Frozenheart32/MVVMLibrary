@@ -1,32 +1,24 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UIView.h"
-#include "UIPopUpView.generated.h"
+#include "CommonActivatableWidget.h"
+#include "UIPopupView.generated.h"
 
 class UWindowSubsystem;
 /**
  * 
  */
 UCLASS(Abstract)
-class MVVMLIBRARY_API UUIPopUpView : public UUserWidget
+class MVVMLIBRARY_API UUIPopupView : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
-public:
-
-	UPROPERTY(BlueprintAssignable)
-	FOnActionDelegate OnDestroyPopUp;
-
 protected:
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MVVM|Pop-Up")
-	EUILayer ViewLayer = EUILayer::PopUp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MVVM|Pop-Up")
 	bool bUseSelfDestroyTimer = false;
@@ -36,7 +28,7 @@ protected:
 private:
 
 	UPROPERTY()
-	bool bIsInitializedPopUp = false;
+	bool bIsStartedPopup = false;
 
 	UPROPERTY()
 	TWeakObjectPtr<UModelRepositorySubsystem> ModelRepository;
@@ -48,23 +40,24 @@ private:
 
 protected:
 
-	virtual void NativeDestruct() override;
-
 	/**
-	 * Should be overridden in C++ heirs
-	 * @param InModelRepository - store of Session Models
-	 * @param InWorldModelRepository - store of Contextual Models
+	 * Calling from lambda (WindowSubsystem)
+	 * @param InModelRepository
+	 * @param InWorldModelRepository 
 	 */
 	UFUNCTION()
-	virtual void InitializePopUp(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository);
+	void InitializePopup(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository);
+	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|Pop-Up", meta=(ForceAsFunction))
+	void FeedPopupData(UObject* FeedDataObject);
+
+
+	virtual void NativeOnActivated() override;
+	virtual void NativeOnDeactivated() override;
 
 public:
-	
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|Pop-Up")
-	EUILayer GetUILayer() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|Pop-Up")
-	bool IsInitializedPopUp() const;
+	bool IsStartedPopUp() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|Pop-Up")
 	UModelRepositorySubsystem* GetModelRepository() const;
@@ -72,18 +65,13 @@ public:
 	UWorldModelRepositorySubsystem* GetWorldModelRepository() const;
 
 protected:
-
-	/**
-	 * Service method. Do not call from C++
-	 * @param InModelRepository 
-	 * @param InWorldModelRepository 
-	 */
-	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|Pop-Up", meta=(ForceAsFunction, DisplayName = "InitializePopUp", ScriptName = "InitializePopUp"))
-	void K2_InitializePopUp(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository);
-
+	
 	friend class UWindowSubsystem;
 
 private:
+	
+	UFUNCTION()
+	void StartDestroyLogic();
 
 	UFUNCTION()
 	void OnDestroyTimerComplete();

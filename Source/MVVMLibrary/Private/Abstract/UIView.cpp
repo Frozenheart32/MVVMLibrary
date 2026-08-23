@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
@@ -11,6 +11,20 @@
 #include "WorldModelRepositorySubsystem.h"
 
 
+void UUIView::NativeOnActivated()
+{
+	Super::NativeOnActivated();
+
+	OnActivatedView.Broadcast();
+}
+
+void UUIView::NativeOnDeactivated()
+{
+	OnDeactivatedView.Broadcast();
+	
+	Super::NativeOnDeactivated();
+}
+
 void UUIView::NativeDestruct()
 {
 	OnDestroyView.Broadcast();
@@ -18,8 +32,7 @@ void UUIView::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UUIView::InitializeView(UModelRepositorySubsystem* InModelRepository,
-                             UWorldModelRepositorySubsystem* InWorldModelRepository)
+void UUIView::InitializeView(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository)
 {
 	if(bIsInitializedView) return;
 
@@ -30,11 +43,6 @@ void UUIView::InitializeView(UModelRepositorySubsystem* InModelRepository,
 	ViewModel->SetModelRepository(InModelRepository);
 	ViewModel->SetWorldModelRepository(InWorldModelRepository);
 	ViewModel->InitializeViewModel(this);
-}
-
-EUILayer UUIView::GetUILayer() const
-{
-	return ViewLayer;
 }
 
 bool UUIView::IsInitializedView() const

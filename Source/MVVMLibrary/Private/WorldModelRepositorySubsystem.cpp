@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
@@ -9,8 +9,19 @@
 #include "Abstract/UIContextualModel.h"
 #include "ModelRepositorySubsystem.h"
 
+UWorldModelRepositorySubsystem* UWorldModelRepositorySubsystem::Get(const UObject* WorldContextObject)
+{
+	if(GEngine)
+	{
+		UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::Assert);
+		return World->GetSubsystem<UWorldModelRepositorySubsystem>();
+	}
+
+	return nullptr;
+}
+
 void UWorldModelRepositorySubsystem::K2_GetContextualModel(UUIContextualModel*& OutContextualModel,
-	TSubclassOf<UUIContextualModel> ModelType)
+                                                           TSubclassOf<UUIContextualModel> ModelType)
 {
 	OutContextualModel = GetContextualModel(MoveTemp(ModelType));
 }

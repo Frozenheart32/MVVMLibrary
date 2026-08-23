@@ -10,7 +10,7 @@
 	"DocsURL": "https://github.com/Frozenheart32/MVVMLibrary/blob/main/README.md",
 	"MarketplaceURL": "",
 	"SupportURL": "",
-	"CanContainContent": false,
+	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": true,
@@ -26,6 +26,12 @@
 				"Android",
 				"Linux"
 			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "CommonUI",
+			"Enabled": true
 		}
 	]
 }
