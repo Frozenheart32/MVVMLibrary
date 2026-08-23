@@ -1,32 +1,53 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
 
-#include "Abstract/UIPopUpView.h"
+#include "Abstract/UIPopupView.h"
 #include "ModelRepositorySubsystem.h"
 #include "WorldModelRepositorySubsystem.h"
 
-void UUIPopUpView::NativeDestruct()
+
+void UUIPopupView::NativeOnActivated()
 {
-	OnDestroyPopUp.Broadcast();
+	Super::NativeOnActivated();
 	
-	Super::NativeDestruct();
+	StartDestroyLogic();
 }
 
-void UUIPopUpView::InitializePopUp(UModelRepositorySubsystem* InModelRepository,
-	UWorldModelRepositorySubsystem* InWorldModelRepository)
+void UUIPopupView::NativeOnDeactivated()
 {
-	if(bIsInitializedPopUp) return;
-
-	bIsInitializedPopUp = true;
-
-	ModelRepository = InModelRepository;
-	WorldModelRepository = InWorldModelRepository;
-
-	K2_InitializePopUp(InModelRepository, InWorldModelRepository);
+	if(SelfDestroyTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(SelfDestroyTimerHandle);
+	}
 	
+	bIsStartedPopup = false;
+
+	Super::NativeOnDeactivated();
+}
+
+void UUIPopupView::InitializePopup(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository)
+{
+	if(!ModelRepository.IsValid())
+		ModelRepository = InModelRepository;
+
+	if(!WorldModelRepository.IsValid())
+		WorldModelRepository = InWorldModelRepository;
+}
+
+void UUIPopupView::FeedPopupData_Implementation(UObject* FeedDataObject)
+{
+	
+}
+
+void UUIPopupView::StartDestroyLogic()
+{
+	if(bIsStartedPopup) return;
+
+	bIsStartedPopup = true;
+
 	if(bUseSelfDestroyTimer)
 	{
 		GetWorld()->GetTimerManager().SetTimer(SelfDestroyTimerHandle,
@@ -37,27 +58,22 @@ void UUIPopUpView::InitializePopUp(UModelRepositorySubsystem* InModelRepository,
 	}
 }
 
-EUILayer UUIPopUpView::GetUILayer() const
+bool UUIPopupView::IsStartedPopUp() const
 {
-	return ViewLayer;
+	return bIsStartedPopup;
 }
 
-bool UUIPopUpView::IsInitializedPopUp() const
-{
-	return bIsInitializedPopUp;
-}
-
-UModelRepositorySubsystem* UUIPopUpView::GetModelRepository() const
+UModelRepositorySubsystem* UUIPopupView::GetModelRepository() const
 {
 	return ModelRepository.IsValid() ? ModelRepository.Get() : nullptr;
 }
 
-UWorldModelRepositorySubsystem* UUIPopUpView::GetWorldModelRepository() const
+UWorldModelRepositorySubsystem* UUIPopupView::GetWorldModelRepository() const
 {
 	return WorldModelRepository.IsValid() ? WorldModelRepository.Get() : nullptr;
 }
 
-void UUIPopUpView::OnDestroyTimerComplete()
+void UUIPopupView::OnDestroyTimerComplete()
 {
-	RemoveFromParent();
+	DeactivateWidget();
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
@@ -54,6 +54,18 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, meta=(BlueprintProtected), Category = "MVVM|ViewModel")
 	UUIView* GetOwnerView() const;
+
+	/**
+	 * Event calling when UView delegate OnActivatedView is broadcasted. You can use an override to unsubscribe own delegate bindings.
+	 */
+	UFUNCTION()
+	virtual void SubscribeOnEvents();
+
+	/**
+	 * Event calling when UView delegate OnDeactivatedView is broadcasted. You can use an override to unsubscribe own delegate bindings.
+	 */
+	UFUNCTION()
+	virtual void UnsubscribeFromEvents();
 	
 	/**
 	 * Event calling when UView delegate OnDestroyView is broadcasted. You can use an override to unsubscribe own delegate bindings.
@@ -85,15 +97,27 @@ protected:
 protected:
 
 	/**
-	 * Event calling when UView delegate OnDestroyView is broadcasted. You can use an override to unsubscribe own delegate bindings.
-	 * Need calling parent version.
+	 * Event calling when UView delegate OnActivatedView is broadcasted.
+	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
+	 */
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "SubscribeOnEvents", ScriptName = "SubscribeOnEvents"))
+	void K2_SubscribeOnEvents();
+	/**
+	 * Event calling when UView delegate OnActivatedView is broadcasted.
+	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
+	 */
+	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "UnsubscribeFromEvents", ScriptName = "UnsubscribeFromEvents"))
+	void K2_UnsubscribeFromEvents();
+	
+	/**
+	 * Event calling when UView delegate OnDestroyView is broadcasted.
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 */
 	UFUNCTION(BlueprintImplementableEvent, Category = "MVVM|ViewModel", meta=(ForceAsFunction, DisplayName = "OnDestroyViewModel", ScriptName = "OnDestroyViewModel"))
 	void K2_OnDestroyViewModel();
 	
 	/**
-	 * Sets the model repository. You can use an override to get the required dependencies.
+	 * Sets the model repository. 
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param InModelRepository 
 	 */
@@ -101,7 +125,7 @@ protected:
 	void K2_SetModelRepository(UModelRepositorySubsystem* InModelRepository);
 
 	/**
-	 * Sets the world model repository. You can use an override to get the required dependencies.
+	 * Sets the world model repository. 
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param InWorldModelRepository 
 	 */
@@ -110,7 +134,6 @@ protected:
 
 	/**
 	 * Base implementation. Serves to cast a view reference to the desired type, subscriptions to view and model delegates.
-	 * Need calling parent version!
 	 * Do not call this event yourself. For C++ there is a virtual method without K2 prefix
 	 * @param View 
 	 */

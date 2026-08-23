@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
@@ -51,12 +51,24 @@ UUIView* UUIViewModel::GetOwnerView() const
 	return OwnerView.IsValid() ? OwnerView.Get() : nullptr;
 }
 
+void UUIViewModel::SubscribeOnEvents()
+{
+	K2_SubscribeOnEvents();
+}
+
+void UUIViewModel::UnsubscribeFromEvents()
+{
+	K2_UnsubscribeFromEvents();
+}
+
 void UUIViewModel::OnDestroyViewModel()
 {
 	//Unsubscribe from OnDestroyView event
 	if(const auto View = GetOwnerView())
 	{
-		View->OnDestroyView.RemoveDynamic(this, &UUIViewModel::OnDestroyViewModel);
+		View->OnDestroyView.Clear();
+		View->OnActivatedView.Clear();
+		View->OnDeactivatedView.Clear();
 	}
 	
 	K2_OnDestroyViewModel();
@@ -82,7 +94,9 @@ void UUIViewModel::InitializeViewModel(UUIView* View)
 	OwnerView = View;
 
 	//Subscribe on OnDestroyView event
-	View->OnDestroyView.AddDynamic(this, &UUIViewModel::OnDestroyViewModel);
+	View->OnDestroyView.AddUObject(this, &UUIViewModel::OnDestroyViewModel);
+	View->OnActivatedView.AddUObject(this, &UUIViewModel::SubscribeOnEvents);
+	View->OnDeactivatedView.AddUObject(this, &UUIViewModel::UnsubscribeFromEvents);
 	
 	K2_InitializeViewModel(View);
 }

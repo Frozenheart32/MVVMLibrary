@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
@@ -18,6 +18,10 @@ UCLASS(NotBlueprintable, BlueprintType)
 class MVVMLIBRARY_API UModelRepositorySubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
+
+public:
+
+	static UModelRepositorySubsystem* Get(const UObject* WorldContextObject);
 
 private:
 	

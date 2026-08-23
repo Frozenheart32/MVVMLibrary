@@ -1,12 +1,13 @@
 /*
-* Copyright (c) 2025 Alexsander Khrapin
+* Copyright (c) 2026 Alexsander Khrapin
 * Licensed under the MIT License. See LICENSE in the project root for license information.
 */
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "CommonActivatableWidget.h"
+#include "WorldModelRepositorySubsystem.h"
 #include "UIView.generated.h"
 
 
@@ -14,16 +15,7 @@ class UWorldModelRepositorySubsystem;
 class UModelRepositorySubsystem;
 class UUIViewModel;
 
-UENUM(BlueprintType)
-enum class EUILayer : uint8
-{
-	BehindHUD			UMETA(DisplayName = "Behind HUD"),
-	HUD					UMETA(DisplayName = "HUD"),
-	GameplayView		UMETA(DisplayName = "Gameplay View"),
-	PopUp,
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnViewActionDelegate);
 
 /**
  * In the paradigm, MVVM represents the base class for all widgets and windows.
@@ -31,19 +23,19 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActionDelegate);
  * No business logic.
  */
 UCLASS(Abstract)
-class MVVMLIBRARY_API UUIView : public UUserWidget
+class MVVMLIBRARY_API UUIView : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
 protected:
 
-	UPROPERTY()
-	FOnActionDelegate OnDestroyView;
+	FOnViewActionDelegate OnActivatedView;
+	FOnViewActionDelegate OnDeactivatedView;
+	
+	FOnViewActionDelegate OnDestroyView;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MVVM|View")
 	TSubclassOf<UUIViewModel> ViewModelClassType;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "MVVM|View")
-	EUILayer ViewLayer = EUILayer::GameplayView;
 
 private:
 
@@ -54,27 +46,27 @@ private:
 	bool bIsInitializedView = false;
 
 protected:
-
-	virtual void NativeDestruct() override;
-
-public:
-
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|View")
-	EUILayer GetUILayer() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|View")
-	bool IsInitializedView() const;
-
-
-protected:
-
+	
 	/**
-	 * Service method. Do not call from C++
+	 * Calling from lambda (WindowSubsystem)
 	 * @param InModelRepository 
 	 * @param InWorldModelRepository 
 	 */
 	UFUNCTION()
 	void InitializeView(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository);
+	
+	virtual void NativeOnActivated() override;
+	virtual void NativeOnDeactivated() override;
+	
+	virtual void NativeDestruct() override;
+
+public:
+
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|View")
+	bool IsInitializedView() const;
+
+protected:
+	
 	
 	UFUNCTION(BlueprintNativeEvent, Category = "MVVM|View", meta=(ForceAsFunction))
 	void ShowView();
@@ -83,4 +75,5 @@ protected:
 
 	friend class UWindowSubsystem;
 	friend class UUIViewModel;
+	
 };

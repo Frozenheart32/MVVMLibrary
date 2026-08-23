@@ -27,6 +27,10 @@ public class MVVMLibrary : ModuleRules
 			{
 				"Core",
 				"UMG",
+				"CommonUI",
+				"CommonInput",
+				"PropertyPath",
+				"GameplayTags",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -39,6 +43,7 @@ public class MVVMLibrary : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"DeveloperSettings",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
