@@ -7,11 +7,11 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Abstract/UIView.h"
+#include "Abstract/UIPopUpView.h"
 #include "Engine/DeveloperSettings.h"
 #include "MVVMLibraryPluginSettings.generated.h"
 
-class UUIPopupView;
-class UUIView;
 
 /**
  * 
@@ -22,6 +22,11 @@ class MVVMLIBRARY_API UMVVMLibraryPluginSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 private:
+
+	UPROPERTY(Config, EditAnywhere, Category = "Preload Types", meta=(ForceInlineRow, Categories = "MVVM.View"))
+	TMap<FGameplayTag, TSubclassOf<UUIView>> PreloadedViews;
+	UPROPERTY(Config, EditAnywhere, Category = "Preload Types", meta=(ForceInlineRow, Categories = "MVVM.View"))
+	TMap<FGameplayTag, TSubclassOf<UUIPopupView>> PreloadedPopups;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "View Reference", meta=(ForceInlineRow, Categories = "MVVM.View"))
 	TMap<FGameplayTag, TSoftClassPtr<UUIView>> Views;
@@ -35,4 +40,10 @@ public:
 	TSoftClassPtr<UUIView> GetViewSoftClassByTag(const FGameplayTag& InViewTag) const;
 	UFUNCTION()
 	TSoftClassPtr<UUIPopupView> GetPopupSoftClassByTag(const FGameplayTag& InPopupTag) const;
+
+	UFUNCTION()
+	const TMap<FGameplayTag, TSubclassOf<UUIView>>& GetPreloadedViews() const;
+	UFUNCTION()
+	const TMap<FGameplayTag, TSubclassOf<UUIPopupView>>& GetPreloadedPopups() const;
+	
 };

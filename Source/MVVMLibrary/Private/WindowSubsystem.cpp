@@ -13,7 +13,10 @@
 #include "Abstract/UIPopupView.h"
 #include "Components/PanelWidget.h"
 #include "Engine/AssetManager.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Settings/MVVMLibraryPluginSettings.h"
 #include "Util/MVVMPluginFunctionLibrary.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
 
@@ -45,6 +48,34 @@ void UWindowSubsystem::K2_PushPopupToStackBySoftClassAsync(APlayerController* Ow
 	PushPopupToStackBySoftClassAsync(OwningPlayerController, InWidgetStackTag, PopupSoftType, bFocusOnNewlyPushedWidget, InFeedDataObject);
 }
 
+void UWindowSubsystem::PostInitialize()
+{
+	const auto MVVMSettings = GetDefault<UMVVMLibraryPluginSettings>();
+	check(MVVMSettings);
+	
+	const auto& PreloadedViews = MVVMSettings->GetPreloadedViews();
+	for (const auto& [Tag, ViewType] : PreloadedViews)
+	{
+		if(!CachedViewTypes.Contains(Tag))
+		{
+			CachedViewTypes.Add(Tag, ViewType);
+		}
+	}
+
+	const auto& PreloadedPopups = MVVMSettings->GetPreloadedPopups();
+	for (const auto& [Tag, PopupType] : PreloadedPopups)
+	{
+		if(!CachedPopupTypes.Contains(Tag))
+		{
+			CachedPopupTypes.Add(Tag, PopupType);
+		}
+	}
+
+	UE_LOG(LogTemp, Display, TEXT("UWindowSubsystem::PostInitialize. Cache types have been initialized"));
+	
+	Super::PostInitialize();
+}
+
 UWindowSubsystem* UWindowSubsystem::Get(const UObject* WorldContextObject)
 {
 	if(GEngine)
@@ -69,52 +100,6 @@ void UWindowSubsystem::CreateAndRegisterCreatedPrimaryLayoutWidget(APlayerContro
 	PrimaryLayoutWidget->AddToViewport();
 }
 
-void UWindowSubsystem::StartPreCachingViewTypes(const TArray<FGameplayTag>& InCachingViewTags)
-{
-	if(InCachingViewTags.IsEmpty()) return;
-
-	for (const auto& ViewTag : InCachingViewTags)
-	{
-		if(CachedViewTypes.Contains(ViewTag)) continue;
-		
-		const auto SoftViewClass = UMVVMPluginFunctionLibrary::GetViewSoftClassByTag(ViewTag);
-		
-		UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		SoftViewClass.ToSoftObjectPath(),
-		FStreamableDelegate::CreateLambda(
-			[this, SoftViewClass, ViewTag]()
-			{
-				if(CachedViewTypes.Contains(ViewTag)) return;
-				
-				CachedViewTypes.Add(ViewTag, SoftViewClass.Get());
-			}
-		));
-	} 
-}
-
-void UWindowSubsystem::StartPreCachingPopupTypes(const TArray<FGameplayTag>& InCachingPopupTags)
-{
-	if(InCachingPopupTags.IsEmpty()) return;
-
-	for (const auto& PopupTag : InCachingPopupTags)
-	{
-		if(CachedPopupTypes.Contains(PopupTag)) continue;
-		
-		const auto SoftPopupClass = UMVVMPluginFunctionLibrary::GetPopupSoftClassByTag(PopupTag);
-		
-		UAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
-		SoftPopupClass.ToSoftObjectPath(),
-		FStreamableDelegate::CreateLambda(
-			[this, SoftPopupClass, PopupTag]()
-			{
-				if(CachedPopupTypes.Contains(PopupTag)) return;
-				
-				CachedPopupTypes.Add(PopupTag, SoftPopupClass.Get());
-			}
-		));
-	} 
-}
-
 void UWindowSubsystem::PushViewToStackByTagAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag,
                                                  const FGameplayTag& InViewTag, bool bIsNeedAddViewTypeToCache, bool bFocusOnNewlyPushedWidget,
                                                  TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback)
@@ -130,6 +115,7 @@ void UWindowSubsystem::PushViewToStackByTagAsync(APlayerController* OwningPlayer
 	
 	if(CachedViewTypes.Contains(InViewTag))
 	{
+		//UE_LOG(LogTemp, Display, TEXT("UWindowSubsystem::PushViewToStackAsync. View with tag %s is already cached."), *InViewTag.ToString());
 		CreateView(OwningPlayerController, CachedViewTypes[InViewTag], InWidgetStackTag, bFocusOnNewlyPushedWidget, AsyncPushStateCallback);
 		return;
 	}
@@ -184,6 +170,7 @@ void UWindowSubsystem::PushPopupToStackByTagAsync(APlayerController* OwningPlaye
 
 	if(CachedPopupTypes.Contains(InPopupTag))
 	{
+		//UE_LOG(LogTemp, Display, TEXT("UWindowSubsystem::PushViewToStackAsync. Popup with tag %s is already cached."), *InPopupTag.ToString());
 		CreatePopup(OwningPlayerController, CachedPopupTypes[InPopupTag], InWidgetStackTag, bFocusOnNewlyPushedWidget, InFeedDataObject, AsyncPushStateCallback);
 		return;
 	}
@@ -229,34 +216,6 @@ void UWindowSubsystem::InitializeExistsView(UUIView* ExistedView)
 	if(IsRunningDedicatedServer() || !ExistedView || ExistedView->IsInitializedView()) return;
 
 	ExistedView->InitializeView(GetModelRepositorySubsystem(), GetWorldModelRepositorySubsystem());
-}
-
-void UWindowSubsystem::HideAllWindows()
-{
-	if(bIsHiddenAllWindows) return;
-	
-	bIsHiddenAllWindows = true;
-	//TODO: Change logic later
-	/*
-	for (const auto& WindowPair : OpenedWindows)
-	{
-		WindowPair.Value->HideView();
-	}
-	*/
-}
-
-void UWindowSubsystem::ShowAllWindows()
-{
-	if(!bIsHiddenAllWindows) return;
-	
-	bIsHiddenAllWindows = false;
-	//TODO: Change logic later
-	/*
-	for (const auto& WindowPair : OpenedWindows)
-	{
-		WindowPair.Value->ShowView();
-	}
-	*/
 }
 
 void UWindowSubsystem::CreateView(APlayerController* OwningPlayerController, const TSubclassOf<UUIView>& LoadedViewClass, const FGameplayTag& InWidgetStackTag, bool bFocusOnNewlyPushedWidget, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback)

@@ -8,6 +8,7 @@
 
 #include "WindowSubsystem.h"
 #include "Abstract/UIPopupView.h"
+#include "Engine/Engine.h"
 
 UAsyncAction_PushPopupBySoftClass* UAsyncAction_PushPopupBySoftClass::PushViewByTag(const UObject* WorldContextObject,
                                                                                     APlayerController* PlayerController,

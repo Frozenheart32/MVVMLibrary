@@ -14,6 +14,8 @@
 ACommonMVVMHUD::ACommonMVVMHUD()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	WidgetStackTagForStartupView = MVVMLayoutTags::MVVMLayout_WidgetStack_GameHud;
 }
 
 void ACommonMVVMHUD::BeginPlay()
@@ -26,27 +28,13 @@ void ACommonMVVMHUD::BeginPlay()
 	{
 		if(const auto WindowSubsystem = UWindowSubsystem::Get(this))
 		{
-			WindowSubsystem->PushViewToStackByTagAsync(GetOwningPlayerController(), MVVMLayoutTags::MVVMLayout_WidgetStack_GameHud, StartupViewTag,
-				false, true, [this](EAsyncPushWidgetState State, UUIView* CreatedWidget)
-				{
-					switch (State)
-					{
-						case EAsyncPushWidgetState::OnCreatedBeforePush:
-							break;
-						case EAsyncPushWidgetState::AfterPush:
-							StartPreCachingViewAndPopupTypes();
-							break;
-						default:
-							break;
-					}
-				}
-			);
+			WindowSubsystem->PushViewToStackByTagAsync(GetOwningPlayerController(), WidgetStackTagForStartupView, StartupViewTag,
+				false, true);
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ACommonHUD::BeginPlay. You have not selected a startup window tag in %s class"), *GetNameSafe(this));
-		StartPreCachingViewAndPopupTypes();
 	}
 }
 
@@ -56,16 +44,5 @@ void ACommonMVVMHUD::CreateAndRegisterPrimaryLayoutWidget()
 	if(const auto WindowSubsystem = UWindowSubsystem::Get(this))
 	{
 		WindowSubsystem->CreateAndRegisterCreatedPrimaryLayoutWidget(GetOwningPlayerController(), PrimaryLayoutWidgetClass);
-	}
-}
-
-void ACommonMVVMHUD::StartPreCachingViewAndPopupTypes()
-{
-	if(PreCachingViewTags.IsEmpty() && PreCachingPopupTags.IsEmpty()) return;
-
-	if(const auto WindowSubsystem = UWindowSubsystem::Get(this))
-	{
-		WindowSubsystem->StartPreCachingViewTypes(PreCachingViewTags);
-		WindowSubsystem->StartPreCachingPopupTypes(PreCachingPopupTags);
 	}
 }

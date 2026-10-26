@@ -6,6 +6,7 @@
 
 #include "Abstract/UIPopupView.h"
 #include "ModelRepositorySubsystem.h"
+#include "TimerManager.h"
 #include "WorldModelRepositorySubsystem.h"
 
 

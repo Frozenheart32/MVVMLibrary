@@ -8,6 +8,8 @@
 
 #include "Abstract/UIContextualModel.h"
 #include "ModelRepositorySubsystem.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 
 UWorldModelRepositorySubsystem* UWorldModelRepositorySubsystem::Get(const UObject* WorldContextObject)
 {
@@ -41,7 +43,7 @@ void UWorldModelRepositorySubsystem::Deinitialize()
 
 UUIContextualModel* UWorldModelRepositorySubsystem::GetContextualModel(TSubclassOf<UUIContextualModel> ModelType)
 {
-	if(!IsValid(ModelType)) return nullptr;
+	if(!ModelType) return nullptr;
 	
 	if(ContextualModels.Contains(ModelType))
 	{

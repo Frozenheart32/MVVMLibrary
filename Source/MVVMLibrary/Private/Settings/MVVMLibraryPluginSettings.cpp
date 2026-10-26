@@ -25,3 +25,13 @@ TSoftClassPtr<UUIPopupView> UMVVMLibraryPluginSettings::GetPopupSoftClassByTag(c
 
 	return Popups[InPopupTag];
 }
+
+const TMap<FGameplayTag, TSubclassOf<UUIView>>& UMVVMLibraryPluginSettings::GetPreloadedViews() const
+{
+	return PreloadedViews;
+}
+
+const TMap<FGameplayTag, TSubclassOf<UUIPopupView>>& UMVVMLibraryPluginSettings::GetPreloadedPopups() const
+{
+	return PreloadedPopups;
+}
