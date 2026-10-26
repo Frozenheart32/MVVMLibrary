@@ -7,6 +7,8 @@
 #include "ModelRepositorySubsystem.h"
 
 #include "Abstract/UISessionModel.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 
 UModelRepositorySubsystem* UModelRepositorySubsystem::Get(const UObject* WorldContextObject)
 {
@@ -27,7 +29,7 @@ void UModelRepositorySubsystem::K2_GetSessionModel(UUISessionModel*& OutSessionM
 
 UUISessionModel* UModelRepositorySubsystem::GetSessionModel(TSubclassOf<UUISessionModel> ModelType)
 {
-	if(!IsValid(ModelType)) return nullptr;
+	if(!ModelType) return nullptr;
 	
 	if(SessionModels.Contains(ModelType))
 	{

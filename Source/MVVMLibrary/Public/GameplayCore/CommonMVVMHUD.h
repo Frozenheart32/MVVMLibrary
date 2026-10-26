@@ -11,7 +11,6 @@
 #include "CommonMVVMHUD.generated.h"
 
 class UPrimaryLayoutWidget;
-class UUIView;
 
 /**
  * 
@@ -33,10 +32,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "MVVM|HUD Settings")
 	FGameplayTag StartupViewTag;
 
-	UPROPERTY(EditDefaultsOnly, Category = "MVVM|HUD Settings")
-	TArray<FGameplayTag> PreCachingViewTags;
-	UPROPERTY(EditDefaultsOnly, Category = "MVVM|HUD Settings")
-	TArray<FGameplayTag> PreCachingPopupTags;
+	UPROPERTY(EditDefaultsOnly, Category = "MVVM|HUD Settings", meta=(Categories = "MVVMLayout.WidgetStack"))
+	FGameplayTag WidgetStackTagForStartupView;
 
 protected:
 
@@ -46,6 +43,4 @@ private:
 
 	UFUNCTION()
 	void CreateAndRegisterPrimaryLayoutWidget();
-	UFUNCTION()
-	void StartPreCachingViewAndPopupTypes();
 };

@@ -67,6 +67,8 @@ protected:
 
 public:
 
+	virtual void PostInitialize() override;
+
 	static UWindowSubsystem* Get(const UObject* WorldContextObject);
 	
 	/**
@@ -76,11 +78,6 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
 	void CreateAndRegisterCreatedPrimaryLayoutWidget(APlayerController* OwningPlayerController, const TSubclassOf<UPrimaryLayoutWidget>& InLayoutWidgetClass);
-
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	void StartPreCachingViewTypes(const TArray<FGameplayTag>& InCachingViewTags);
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	void StartPreCachingPopupTypes(const TArray<FGameplayTag>& InCachingPopupTags);
 	
 	void PushViewToStackByTagAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const FGameplayTag& InViewTag, bool bIsNeedAddTypeToCache, bool bFocusOnNewlyPushedWidget = true, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback = {});
 	void PushViewToStackBySoftClassAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const TSoftClassPtr<UUIView>& ViewSoftType, bool bFocusOnNewlyPushedWidget = true, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback = {});
@@ -91,11 +88,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
 	void InitializeExistsView(UUIView* ExistedView);
-
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	void HideAllWindows();
-	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "MVVM|WindowSubsystem")
-	void ShowAllWindows();
 
 private:
 

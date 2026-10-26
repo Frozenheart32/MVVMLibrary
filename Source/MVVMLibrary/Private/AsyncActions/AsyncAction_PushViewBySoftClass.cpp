@@ -7,10 +7,11 @@
 #include "AsyncActions/AsyncAction_PushViewBySoftClass.h"
 
 #include "WindowSubsystem.h"
+#include "Engine/Engine.h"
 
 UAsyncAction_PushViewBySoftClass* UAsyncAction_PushViewBySoftClass::PushViewBySoftClass(const UObject* WorldContextObject,
-                                                                                  APlayerController* PlayerController, FGameplayTag WidgetStackTag, TSoftClassPtr<UUIView> ViewSoftClass,
-                                                                                  bool bFocusOnNewlyPushedWidget)
+                                                                                        APlayerController* PlayerController, FGameplayTag WidgetStackTag, TSoftClassPtr<UUIView> ViewSoftClass,
+                                                                                        bool bFocusOnNewlyPushedWidget)
 {
 	if(!WorldContextObject) return nullptr;
 	

@@ -7,6 +7,7 @@
 #include "AsyncActions/AsyncAction_PushViewByTag.h"
 
 #include "WindowSubsystem.h"
+#include "Engine/Engine.h"
 
 UAsyncAction_PushViewByTag* UAsyncAction_PushViewByTag::PushViewByTag(const UObject* WorldContextObject,
                                                                       APlayerController* PlayerController, FGameplayTag WidgetStackTag, FGameplayTag ViewTag,
