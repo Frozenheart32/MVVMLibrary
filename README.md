@@ -1,16 +1,26 @@
 # MVVM Library Plugin
 
-![License](https://img.shields.io/badge/license-MIT-blue) ![Version](https://img.shields.io/badge/version-1.0.0-green) ![UE5](https://img.shields.io/badge/Unreal%20Engine-5.3+-blue?logo=unrealengine)
+![License](https://img.shields.io/badge/license-MIT-blue) ![Version](https://img.shields.io/badge/version-2.0.0-green) ![UE5](https://img.shields.io/badge/Unreal%20Engine-5.8+-blue?logo=unrealengine)
 
 # Purpose
 
 The MVVM (Model-View-ViewModel) architectural pattern is designed to separate data management logic from presentation logic.
+
+##Dependencies
+
+- **CommonUI** (UE5 plugin)
 
 ## Components
 
 - **Model** - represents the data structure and business logic
 - **View** - handles UI presentation and user interaction  
 - **ViewModel** - acts as an intermediary layer between Model and View
+
+- **CommmonMVVMHUD** - startup UI logic.
+- **WindowSubsystem** - manages UUIView lifecyrcle (to create, close, reopen).
+- **MVVMGlobalTags** - tags for WidgetStacks
+- **PrimaryLayoutWidget** -  stores all UI widgets in a map: WidgetStack tag → container (layers).  WBP_CUW_PrimaryLayout - prepared blueprint.
+- **UMVVMLibraryPluginSettings** - Developer settings. Edit -> Project settings -> MVVM Plugin Settings. Register all UUIView (soft refs) by tags. And prepare precached UUIView (hard refs).
 
 ## Data Flow
 
@@ -149,22 +159,23 @@ Virtual methods for C++ heirs:
 The View serves to display data in the user interface and may also contain input elements (e.g., purchase buttons in a store).
 
 ### Inheritance Chain
-UObject -> UVisual -> UWidget -> UUserWidget -> UUIView
+UObject -> UVisual -> UWidget -> UUserWidget -> UCommonActivatableWidget -> UUIView
 
 
 ### Delegates
 
 **`OnDestroyView`**
 Protected. This delegate is called when the window is destroyed (upon closing or level transition). The `UIViewModel` (friend class) subscribes to this delegate in the base logic of `UIViewModel::InitializeViewModel()`.
+**`OnActivatedView`**
+Protected. This delegate is called when the window is created or was opening again (Broadcasted from CommonUI logic - OnNativeOnActivated). The `UIViewModel` (friend class) subscribes to this delegate in the base logic of `UIViewModel::InitializeViewModel()`.
+**`OnDeactivatedView`**
+Protected. This delegate is called when the window was closing (Broadcasted from CommonUI logic - OnNativeOnDeactivated). The `UIViewModel` (friend class) subscribes to this delegate in the base logic of `UIViewModel::InitializeViewModel()`.
 
 
 ### Fields
 
 **`TSubclassOf<UUIViewModel> ViewModelClassType`** 
 Protected. This field allows you to select the type of ViewModel that will be used for this view. Can be edited in Class Defaults.
-
-**`EUILayer ViewLayer`** 
-Protected. This field determines on which layer the view will be displayed (BehindHUD, HUD, GameplayHUD, PopUp). Can be edited in Class Defaults.
 
 ### Methods
 
@@ -245,6 +256,12 @@ Called immediately after `K2_SetModelRepository`. Should be used to initialize t
 **`void K2_OnDestroyViewModel(UUIView* View)`**
 Protected. This method is a BlueprintImplementableEvent. Called when the `OnDestroyView` delegate is broadcasted on the `OwnerView`. In the base logic, it unsubscribes from this event. You can extend this logic to unsubscribe from your custom subscriptions to model and view delegate.
 
+**`void K2_SubscribeOnEvents`**
+Protected. This method is a BlueprintImplementableEvent. Called when the `OnActivatedView` delegate is broadcasted on the `OwnerView`. In the base logic, it unsubscribes from this event. You can extend this logic to unsubscribe from your custom subscriptions to model and view delegate.
+
+**`void K2_UnsubscribeFromEvents`**
+Protected. This method is a BlueprintImplementableEvent. Called when the `OnDeactivatedView` delegate is broadcasted on the `OwnerView`. In the base logic, it unsubscribes from this event. You can extend this logic to unsubscribe from your custom subscriptions to model and view delegate.
+
 
 Virtual methods for C++ heirs:
 
@@ -256,6 +273,10 @@ Virtual methods for C++ heirs:
 
 **`virtual void OnDestroyViewModel()`** - Unsubscribing from OnDestroyView delegate (UUIVIew). Call K2_OnDestroyViewModel method.
 
+**`virtual void SubscribeOnEvents()`** - Unsubscribing from OnActivated delegate (UUIVIew). Call K2_SubscribeOnEvents method.
+
+**`virtual void UnsubscribeFromEvents()`** - Unsubscribing from OnActivated delegate (UUIVIew). Call K2_UnsubscribeFromEvents method.
+
 
 ## 🎯 `UUIPopUpView` class
 
@@ -266,20 +287,11 @@ Virtual methods for C++ heirs:
 As `UUIView`, it is instantiated through `UWindowSubsystem`.
 
 ### Inheritance Chain
-UObject -> UVisual -> UWidget -> UUserWidget -> UUIPopUpView
 
-### Delegates
-
-**`OnDestroyView`**
-Public. This delegate is called when the PopUp is destroyed (timer or closing).
+UObject -> UVisual -> UWidget -> UUserWidget -> UCommonActivatableWidget -> UUIPopUpView
 
 
 ### Fields
-
-**`EUILayer ViewLayer`** 
-Protected. This field determines on which layer the view will be displayed (BehindHUD, HUD, GameplayHUD, PopUp). Can be edited in Class Defaults.
-
-
 **`bool bUseSelfDestroyTimer`** 
 Protected. Determines whether the self-destruction timer will be used for the PopUp.
 
@@ -287,14 +299,12 @@ Protected. Determines whether the self-destruction timer will be used for the Po
 Protected. Default value = 3.f. Self destroy timer.
 
 ### Methods
-**`void K2_InitializePopUp(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository)`**
+**`void InitializePopUp(UModelRepositorySubsystem* InModelRepository, UWorldModelRepositorySubsystem* InWorldModelRepository)`**
 Protected. 
 
-**`EUILayer GetUILayer() const`** 
-Public. Returns information about which layer the PopUp operates on.
+**`void FeedPopupData(UObject* FeedDataObject)`**
+Protected BlueprintNative event.
 
-**`bool IsInitializedPopUp() const`** 
-Public. Checks whether the PopUp initialization has been completed.
 
 **`UModelRepositorySubsystem* GetModelRepository() const`**
 Public. Provides access to session models.
@@ -413,15 +423,48 @@ Public. Closes all open windows.
 **`bool IsOpen(TSubclassOf<UUIView> WindowType) const`**
 Public. Returns whether a window of the specified type is currently open.
 
+**`void PushViewToStackByTagAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const FGameplayTag& InViewTag, bool bIsNeedAddTypeToCache, bool bFocusOnNewlyPushedWidget = true, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback = {})`**  
+public. C++ method
+- search to preloaded UUIView types or start soft type loading.
+- Add or reopen from Container by WidgetStack.
 
-**`UUIPopUpView* CreatePopUp(TSubclassOf<UUIPopUpView> PopUpType, APlayerController* Owner = nullptr, UPanelWidget* ParentWidget = nullptr)`**  
-Public. This C++ method creates a new PopUp. It performs the following actions on the new instance:
-- Calls `AddToViewport` on it, converting the enum to int as a parameter for layer selection
+**`void K2_PushViewToStackByTagAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, UPARAM(meta = (Categories = "MVVM.View"))FGameplayTag InViewTag, bool bIsNeedAddTypeToCache = true, bool bFocusOnNewlyPushedWidget = true)`**  
+Protected. Blueprint variant.
+
+**`void PushViewToStackBySoftClassAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const TSoftClassPtr<UUIView>& ViewSoftType, bool bFocusOnNewlyPushedWidget = true, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback = {})`**  
+public. C++ method
+- Add or reopen from Container by WidgetStack.
+
+**`void K2_PushViewToStackBySoftClassAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, TSoftClassPtr<UUIView> ViewSoftType, bool bFocusOnNewlyPushedWidget = true)`**  
+Protected. Blueprint variant.
+
+**`void PushPopupToStackByTagAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const FGameplayTag& InPopupTag, bool bIsNeedAddTypeToCache, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr, TFunction<void(EAsyncPushWidgetState, UUIPopupView*)> AsyncPushStateCallback = {})`**  
+public. C++ method
+- search to preloaded UUIView types or start soft type loading.
+- Add or reopen from Container by WidgetStack.
+
+**`void K2_PushPopupToStackByTagAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, UPARAM(meta = (Categories = "MVVM.Popup"))FGameplayTag InPopupTag, bool bIsNeedAddTypeToCache = true, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr)`**  
+Protected. Blueprint variant.
+
+
+**`void PushPopupToStackBySoftClassAsync(APlayerController* OwningPlayerController, const FGameplayTag& InWidgetStackTag, const TSoftClassPtr<UUIPopupView>& PopupSoftType, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr, TFunction<void(EAsyncPushWidgetState, UUIPopupView*)> AsyncPushStateCallback = {})`**  
+public. C++ method
+- Add or reopen from Container by WidgetStack.
+
+**`void K2_PushPopupToStackBySoftClassAsync(APlayerController* OwningPlayerController, UPARAM(meta = (Categories = "MVVMLayout.WidgetStack"))FGameplayTag InWidgetStackTag, TSoftClassPtr<UUIPopupView> PopupSoftType, bool bFocusOnNewlyPushedWidget = true, UObject* InFeedDataObject = nullptr)`**  
+Protected. Blueprint variant.
+
+
+**`void CreateView(APlayerController* OwningPlayerController, const TSubclassOf<UUIView>& LoadedViewClass, const FGameplayTag& InWidgetStackTag, bool bFocusOnNewlyPushedWidget, TFunction<void(EAsyncPushWidgetState, UUIView*)> AsyncPushStateCallback)`**  
+private. This C++ method creates a new PopUp. It performs the following actions on the new instance:
+- Calls `InitializeView` on it.
+- Add or reopen from Container by WidgetStack.
+
+**`void CreatePopup(APlayerController* OwningPlayerController, const TSubclassOf<UUIPopupView>& LoadedPopupClass, const FGameplayTag& InWidgetStackTag, bool bFocusOnNewlyPushedWidget, UObject* InFeedDataObject, TFunction<void(EAsyncPushWidgetState, UUIPopupView*)> AsyncPushStateCallback)`**  
+private. This C++ method creates a new PopUp. It performs the following actions on the new instance:
 - Calls `InitializePopUp` on it.
+- Calls `FeedPopUpData` on it.
+- Add or reopen from Container by WidgetStack.
 
-**`T* CreatePopUp(TSubclassOf<UUIPopUpView> PopUpType, APlayerController* Owner = nullptr, UPanelWidget* ParentWidget = nullptr)`** 
-Public. This template method for C++ calls the previous method and performs `Cast<T>` on its result.
 
-**`void K2_CreatePopUp(UUIPopUpView*& OutPopUp, bool& bResult, UPARAM(meta=(AllowAbstract=false))TSubclassOf<UUIPopUpView> PopUpType, APlayerController* Owner = nullptr, UPanelWidget* ParentWidget = nullptr)`** 
-Protected. This method variant is for Blueprints only.
 
