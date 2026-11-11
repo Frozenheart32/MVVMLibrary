@@ -5,6 +5,7 @@
 
 
 #include "ObjectWithWorldContext.h"
+#include "Engine/World.h"
 
 UWorld* UObjectWithWorldContext::GetWorldContext() const
 {
